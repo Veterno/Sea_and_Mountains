@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет - Sea & Mountains</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- Навигация -->
+    <nav class="bg-white shadow-md p-4 flex justify-between items-center">
+        <a href="{{ url_for('index') }}" class="text-2xl font-bold text-blue-600">Sea & Mountains</a>
+        <div class="flex items-center space-x-4">
+            <span class="text-gray-600">Баланс: {{ user.balance }} руб.</span>
+            <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=0D8ABC&color=fff" alt="Аватар" class="w-10 h-10 rounded-full border-2 border-blue-500">
+        </div>
+    </nav>
+
+    <div class="container mx-auto py-8 px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Левая колонка: Профиль и Баланс -->
+            <div class="bg-white p-6 rounded-xl shadow-md h-fit">
+                <h2 class="text-2xl font-bold mb-4">Ваш профиль</h2>
+                <div class="flex items-center space-x-4 mb-6">
+                    <img src="https://ui-avatars.com/api/?name={{ user.username }}&size=128" class="w-20 h-20 rounded-full">
+                    <div>
+                        <p class="text-xl font-bold">{{ user.username }}</p>
+                        <p class="text-gray-500">ID: {{ user.id }}</p>
+                    </div>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <p class="text-sm text-blue-600 font-semibold uppercase">Текущий баланс</p>
+                    <p class="text-3xl font-bold text-blue-800">{{ user.balance }} руб. (виртуально)</p>
+                </div>
+            </div>
+
+            <!-- Центральная колонка: Корзина -->
+            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2">
+                <h2 class="text-2xl font-bold mb-6">Ваша корзина</h2>
+                
+                {% if cart_items %}
+                <div class="space-y-4 mb-8">
+                    {% for item in cart_items %}
+                    <div class="flex items-center justify-between border-b pb-4">
+                        <div class="flex items-center space-x-4">
+                            <img src="/{{ item.tour.image_url }}" class="w-16 h-16 object-cover rounded">
+                            <div>                                <p class="font-bold">{{ item.tour.title }}</p>
+                                <p class="text-sm text-gray-500">{{ item.tour.category }}</p>
+                            </div>
+                        </div>
+                        <p class="font-bold text-lg">{{ item.tour.price }} руб.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="flex justify-between items-center bg-gray-50 p-6 rounded-xl">
+                    <div>
+                        <p class="text-gray-600">Итого к оплате:</p>
+                        <p class="text-3xl font-bold text-gray-900">{{ total_cart }} руб.</p>
+                    </div>
+                    <form action="{{ url_for('pay') }}" method="post">
+                        <button type="submit" class="bg-green-600 text-white px-8 py-3 rounded-xl font-bold text-lg hover:bg-green-700 transition shadow-lg">
+                            Оплатить через ЮKassa
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="text-center py-12">
+                    <p class="text-gray-500 text-xl">Ваша корзина пуста</p>
+                    <a href="{{ url_for('index') }}" class="text-blue-600 hover:underline mt-4 inline-block">Вернуться к выбору туров</a>
+                </div>
+                {% endif %}
+
+                <!-- История платежей -->
+                <h2 class="text-2xl font-bold mt-12 mb-6">История платежей</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b text-gray-500 uppercase text-sm">
+                                <th class="py-3">ID Заказа</th>
+                                <th class="py-3">Сумма</th>
+                                <th class="py-3">Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr class="border-b">
+                                <td class="py-4 font-mono text-sm">{{ order.payment_id[:12] }}...</td>
+                                <td class="py-4 font-bold">{{ order.amount }} руб.</td>
+                                <td class="py-4">
+                                    {% if order.status == 'succeeded' %}
+                                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">Оплачено</span>
+                                    {% else %}
+                                    <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">Ожидание</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
